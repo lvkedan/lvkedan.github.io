@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Animation</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff3e3e',
+                        secondary: '#ff6b6b',
+                        light: '#ffebee',
+                        dark: '#424242'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'breathe': 'breathe 1.5s ease-in-out infinite',
+                        'pulse-fast': 'pulse 0.5s ease-in-out'
+                    },
+                    keyframes: {
+                        breathe: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .text-shadow-lg {
+                text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+            .heart-shadow {
+                filter: drop-shadow(0 4px 6px rgba(255, 62, 62, 0.3));
+            }
+        }
+        
+        body {
+            overflow: hidden;
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .heart-container {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .heart-container:active {
+            transform: scale(0.95);
+        }
+        
+        .heart {
+            color: #ff3e3e;
+            animation: breathe 1.5s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(255, 62, 62, 0.5);
+        }
+        
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 4px 6px rgba(255, 62, 62, 0.3));
+            }
+            50% {
+                transform: scale(1.1);
+                filter: drop-shadow(0 6px 8px rgba(255, 62, 62, 0.5));
+            }
+        }
+        
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .message {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="heart-container" id="heartContainer">
+        <div class="heart text-[10rem] md:text-[15rem]" id="heart">
+            <i class="fa fa-heart"></i>
+        </div>
+    </div>
+    
+    <div class="message mt-8 text-2xl md:text-4xl font-bold text-primary text-shadow-lg" id="message">
+        I ❤️ You!
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const heartContainer = document.getElementById('heartContainer');
+            const heart = document.getElementById('heart');
+            const message = document.getElementById('message');
+            const body = document.body;
+            
+            // Toggle message visibility on heart click
+            heartContainer.addEventListener('click', () => {
+                // Trigger heart pulse animation
+                heart.classList.add('animate-pulse-fast');
+                setTimeout(() => {
+                    heart.classList.remove('animate-pulse-fast');
+                }, 500);
+                
+                // Show message with animation
+                message.classList.toggle('show');
+                
+                // Create fireworks
+                createFireworks();
+                
+                // Change background color temporarily
+                const originalBackground = body.style.background;
+                body.style.background = 'linear-gradient(135deg, #ffcdd2 0%, #ff9e80 100%)';
+                setTimeout(() => {
+                    body.style.background = originalBackground;
+                }, 1000);
+            });
+            
+            // Create fireworks animation
+            function createFireworks() {
+                // Number of particles per firework
+                const particleCount = 100;
+                
+                // Create particles
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('firework');
+                    
+                    // Random color
+                    const colors = ['#ff3e3e', '#ff6b6b', '#ff9e80', '#ffccbc', '#ff8a80'];
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.backgroundColor = randomColor;
+                    
+                    // Random position around heart
+                    const heartRect = heart.getBoundingClientRect();
+                    const heartCenterX = heartRect.left + heartRect.width / 2;
+                    const heartCenterY = heartRect.top + heartRect.height / 2;
+                    
+                    // Random distance from center
+                    const distance = Math.random() * 200 + 50;
+                    
+                    // Random angle
+                    const angle = Math.random() * Math.PI * 2;
+                    
+                    // Calculate position
+                    const x = heartCenterX + Math.cos(angle) * distance - 5; // -5 to center the particle
+                    const y = heartCenterY + Math.sin(angle) * distance - 5;
+                    
+                    particle.style.left = `${x}px`;
+                    particle.style.top = `${y}px`;
+                    
+                    // Add to DOM
+                    document.body.appendChild(particle);
+                    
+                    // Animate particle
+                    animateParticle(particle, angle);
+                }
+            }
+            
+            // Animate individual particle
+            function animateParticle(particle, angle) {
+                // Random duration
+                const duration = Math.random() * 1000 + 1000;
+                
+                // Random distance to travel
+                const distance = Math.random() * 50 + 50;
+                
+                // Calculate end position
+                const x = parseFloat(particle.style.left) + Math.cos(angle) * distance;
+                const y = parseFloat(particle.style.top) + Math.sin(angle) * distance;
+                
+                // Animate
+                particle.animate([
+                    { 
+                        left: particle.style.left, 
+                        top: particle.style.top,
+                        opacity: 1,
+                        transform: 'scale(1)'
+                    },
+                    { 
+                        left: `${x}px`, 
+                        top: `${y}px`,
+                        opacity: 0,
+                        transform: 'scale(0.5)'
+                    }
+                ], {
+                    duration: duration,
+                    easing: 'ease-out'
+                });
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    particle.remove();
+                }, duration);
+            }
+            
+            // Initial message reveal after page load
+            setTimeout(() => {
+                message.classList.add('show');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
